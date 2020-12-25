@@ -1,6 +1,6 @@
 module striped.billing_details;
 
-import striped.billing_address;
+import striped.address;
 import striped.embeddable;
 
 struct StripeBillingDetails
@@ -11,5 +11,5 @@ struct StripeBillingDetails
     mixin field!(string, "email");
     mixin field!(string, "phone");
 
-    mixin embeddable!(StripeBillingAddress, "address");
+    mixin embeddable!(StripeAddress, "address");
 }

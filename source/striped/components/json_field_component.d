@@ -7,9 +7,13 @@ mixin template JSONFieldComponent()
 
     mixin template field(FieldType, string propertyName, string jsonAttributeName = propertyName)
     {
-        import std.traits : isAssignable;
+        import std.traits : isAssignable, isArray, isSomeString, ForeachType;
 
-        static if (isAssignable!(FieldType, typeof(null)))
+        static if (isArray!(FieldType) && !isSomeString!(FieldType))
+        {
+            alias T = const(ForeachType!(FieldType))[];
+        }
+        else static if (isAssignable!(FieldType, typeof(null)))
         {
             alias T = FieldType;
         }
@@ -28,9 +32,18 @@ mixin template JSONFieldComponent()
 
                 if (const value = %s in _object)
                 {
-                    static if (is(T == JSONValue))
+                    static if (is(FieldType == JSONValue))
                     {
                         result = *value;
+                    }
+                    else static if (isArray!(FieldType) && !isSomeString!(FieldType))
+                    {
+                        import std.algorithm : map;
+                        import std.array : array;
+
+                        result = value.array
+                            .map!((element) => element.get!(ForeachType!(FieldType)))
+                            .array;
                     }
                     else
                     {

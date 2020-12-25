@@ -1,8 +1,8 @@
-module striped.billing_address;
+module striped.address;
 
 import striped.embeddable;
 
-struct StripeBillingAddress
+struct StripeAddress
 {
     mixin Embeddable;
 
