@@ -1,70 +1,20 @@
 module striped.charge;
 
-import striped.client;
 import striped.object;
-
-import std.json;
-import std.typecons;
 
 struct StripeCharge
 {
-    mixin StripeObject!("_charge");
-
-private:
-    StripeClient _client;
-    string       _id;
-    JSONValue    _charge;
-
-public:
-    @disable this();
-
-    this(StripeClient client)
-    {
-        _client = client;
-        _charge = JSONValue((string[string]).init);
-    }
-
-    this(StripeClient client, JSONValue charge)
-    {
-        _client = client;
-        _id     = charge["id"].str;
-        _charge = charge;
-    }
-
-    @property
-    string id() const
-    {
-        return _id;
-    }
-
-    @property
-    bool isPersisted() const
-    {
-        return _id !is null;
-    }
+    mixin StripeObject;
 
     mixin field!(int, "amount");
     mixin field!(int, "amountCaptured", "amount_captured");
     mixin field!(int, "amountRefunded", "amount_refunded");
+}
 
-    // @property
-    // Nullable!(int) amount() const
-    // {
-    //     Nullable!(int) result;
-
-    //     if (auto value = "amount" in _charge)
-    //     {
-    //         result = value.get!(int);
-    //     }
-
-    //     return result;
-    // }
-
-    // @property
-    // void amount(uint amount)
-    // {
-    //     _charge["amount"] = JSONValue(amount);
-    // }
+version (unittest)
+{
+    import std.json;
+    import striped.client;
 }
 
 unittest
@@ -84,11 +34,13 @@ unittest
         {
             "id": "ch_12345",
             "object": "charge",
-            "amount": 15000
+            "amount": 15000,
+            "amount_refunded": 5000
         }
     `));
 
     assert(charge.id == "ch_12345");
     assert(charge.isPersisted == true);
     assert(charge.amount == 150_00);
+    assert(charge.amountRefunded == 50_00);
 }
