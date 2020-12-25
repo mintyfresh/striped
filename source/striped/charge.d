@@ -1,12 +1,15 @@
 module striped.charge;
 
 import striped.client;
+import striped.object;
 
 import std.json;
 import std.typecons;
 
 struct StripeCharge
 {
+    mixin StripeObject!("_charge");
+
 private:
     StripeClient _client;
     string       _id;
@@ -40,24 +43,28 @@ public:
         return _id !is null;
     }
 
-    @property
-    Nullable!(int) amount() const
-    {
-        Nullable!(int) result;
+    mixin field!(int, "amount");
+    mixin field!(int, "amountCaptured", "amount_captured");
+    mixin field!(int, "amountRefunded", "amount_refunded");
 
-        if (auto value = "amount" in _charge)
-        {
-            result = value.get!(int);
-        }
+    // @property
+    // Nullable!(int) amount() const
+    // {
+    //     Nullable!(int) result;
 
-        return result;
-    }
+    //     if (auto value = "amount" in _charge)
+    //     {
+    //         result = value.get!(int);
+    //     }
 
-    @property
-    void amount(uint amount)
-    {
-        _charge["amount"] = JSONValue(amount);
-    }
+    //     return result;
+    // }
+
+    // @property
+    // void amount(uint amount)
+    // {
+    //     _charge["amount"] = JSONValue(amount);
+    // }
 }
 
 unittest
