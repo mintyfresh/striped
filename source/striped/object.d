@@ -1,83 +1,22 @@
 module striped.object;
 
-import striped.exception;
-
 import std.json;
 import std.string;
-
-class StripeJSONException : StripeException
-{
-private:
-    JSONValue _value;
-    JSONType  _expectedType;
-
-public:
-    this(JSONValue value, JSONType expectedType = JSONType.object,
-         string file = __FILE__, size_t line = __LINE__, Throwable nextInChain = null)
-    {
-        const actualType = value.type;
-        const message    = "Expected JSON type to be `%s`, but got `%s`".format(expectedType, actualType);
-
-        super(message, file, line, nextInChain);
-
-        _value        = value;
-        _expectedType = expectedType;
-    }
-
-    @property
-    JSONValue value() const
-    {
-        return _value;
-    }
-
-    @property
-    JSONType expectedType() const
-    {
-        return _expectedType;
-    }
-}
-
-class StripeObjectTypeException : StripeException
-{
-private:
-    JSONValue _value;
-    string  _expectedType;
-
-public:
-    this(JSONValue value, string expectedType,
-         string file = __FILE__, size_t line = __LINE__, Throwable nextInChain = null)
-    {
-        const actualType = value["object"].str;
-        const message    = "Excepted Stripe object to be `%s`, but got `%s`".format(expectedType, actualType);
-
-        super(message, file, line, nextInChain);
-
-        _value        = value;
-        _expectedType = expectedType;
-    }
-
-    @property
-    JSONValue value() const
-    {
-        return _value;
-    }
-
-    @property
-    string expectedType() const
-    {
-        return _expectedType;
-    }
-}
 
 mixin template StripeObject(string _stripeObjectType)
 {
     import std.exception : enforce;
     import std.json : JSONValue, JSONType;
     import std.string : format;
-    import std.typecons : Nullable;
     import std.variant : Algebraic;
 
     import striped.client;
+    import striped.components.json_embed_component;
+    import striped.components.json_field_component;
+    import striped.exception;
+
+    mixin JSONEmbedComponent;
+    mixin JSONFieldComponent;
 
 private:
     StripeClient _client;
@@ -120,54 +59,13 @@ public:
         return _id !is null;
     }
 
-    mixin template field(T, string propertyName, string jsonAttributeName = propertyName)
-    {
-        mixin(`
-            @property
-            Nullable!(T) %s() const
-            {
-                typeof(return) result;
-
-                if (const value = %s in _object)
-                {
-                    result = value.get!(T);
-                }
-
-                return result;
-            }
-        `.format(
-            propertyName,
-            jsonAttributeName.stringof
-        ));
-
-        mixin(`
-            @property
-            void %s(T value)
-            {
-                _object[%s] = JSONValue(value);
-            }
-        `.format(
-            propertyName,
-            jsonAttributeName.stringof
-        ));
-
-        mixin(`
-            @property
-            void %s(typeof(null))
-            {
-                _object[%s] = JSONValue(null);
-            }
-        `.format(
-            propertyName,
-            jsonAttributeName.stringof
-        ));
-    }
-
     mixin template expandable(ObjectType, string propertyName, string jsonAttributeName = propertyName)
     {
+        alias T = Algebraic!(string, ObjectType, typeof(null));
+
         mixin(`
             @property
-            Algebraic!(string, ObjectType, typeof(null)) %s() const
+            T %s() const
             {
                 typeof(return) result;
 
@@ -211,6 +109,7 @@ version (unittest)
     import std.variant : visit;
 
     import striped.client;
+    import striped.exception;
 
     struct TestObject
     {
