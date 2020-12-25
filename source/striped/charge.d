@@ -1,5 +1,6 @@
 module striped.charge;
 
+import striped.billing_details;
 import striped.customer;
 import striped.object;
 
@@ -10,8 +11,37 @@ struct StripeCharge
     mixin field!(int, "amount");
     mixin field!(int, "amountCaptured", "amount_captured");
     mixin field!(int, "amountRefunded", "amount_refunded");
+    mixin field!(string, "currency");
+    mixin field!(string, "description");
+    mixin field!(bool, "disputed");
+    mixin field!(JSONValue, "metadata");
+    mixin field!(string, "receiptEmail", "receipt_email");
+    mixin field!(bool, "refunded");
+    mixin field!(string, "statementDescriptor", "statement_descriptor");
+    mixin field!(string, "statementDescriptorSuffix", "statement_descriptor_suffix");
+    mixin field!(string, "status");
 
     mixin expandable!(StripeCustomer, "customer");
+
+    mixin embeddable!(StripeBillingDetails, "billingDetails", "billing_details");
+
+    @property
+    bool isPending() const
+    {
+        return status == "pending";
+    }
+
+    @property
+    bool isSucceeded() const
+    {
+        return status == "succeeded";
+    }
+
+    @property
+    bool isFailed() const
+    {
+        return status == "failed";
+    }
 }
 
 version (unittest)

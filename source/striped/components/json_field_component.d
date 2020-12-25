@@ -4,19 +4,38 @@ mixin template JSONFieldComponent()
 {
     import std.json : JSONValue, JSONType;
     import std.string : format;
-    import std.typecons : Nullable;
 
-    mixin template field(T, string propertyName, string jsonAttributeName = propertyName)
+    mixin template field(FieldType, string propertyName, string jsonAttributeName = propertyName)
     {
+        import std.traits : isAssignable;
+
+        static if (isAssignable!(FieldType, typeof(null)))
+        {
+            alias T = FieldType;
+        }
+        else
+        {
+            import std.typecons : Nullable;
+
+            alias T = Nullable!(FieldType);
+        }
+
         mixin(`
             @property
-            Nullable!(T) %s() const
+            T %s() const
             {
                 typeof(return) result;
 
                 if (const value = %s in _object)
                 {
-                    result = value.get!(T);
+                    static if (is(T == JSONValue))
+                    {
+                        result = *value;
+                    }
+                    else
+                    {
+                        result = value.get!(FieldType);
+                    }
                 }
 
                 return result;
@@ -28,7 +47,7 @@ mixin template JSONFieldComponent()
 
         mixin(`
             @property
-            void %s(T value)
+            void %s(FieldType value)
             {
                 _object[%s] = JSONValue(value);
             }
