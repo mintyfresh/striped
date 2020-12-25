@@ -2,6 +2,7 @@ module striped.charge;
 
 import striped.billing_details;
 import striped.customer;
+import striped.invoice;
 import striped.object;
 
 struct StripeCharge
@@ -22,6 +23,7 @@ struct StripeCharge
     mixin field!(string, "status");
 
     mixin expandable!(StripeCustomer, "customer");
+    mixin expandable!(StripeInvoice, "invoice");
 
     mixin embeddable!(StripeBillingDetails, "billingDetails", "billing_details");
 
