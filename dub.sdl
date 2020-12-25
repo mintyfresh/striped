@@ -1,0 +1,5 @@
+name "striped"
+description "Yet another Stripe API wrapper, this time for D."
+authors "mintyfresh"
+copyright "Copyright © 2020, mintyfresh"
+license "MIT"

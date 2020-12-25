@@ -1,0 +1,15 @@
+.dub
+docs.json
+__dummy.html
+docs/
+/striped
+striped.so
+striped.dylib
+striped.dll
+striped.a
+striped.lib
+striped-test-*
+*.exe
+*.o
+*.obj
+*.lst
