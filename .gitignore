@@ -9,6 +9,7 @@ striped.dll
 striped.a
 striped.lib
 striped-test-*
+libstriped.a
 *.exe
 *.o
 *.obj
