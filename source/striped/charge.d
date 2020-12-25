@@ -1,5 +1,6 @@
 module striped.charge;
 
+import striped.customer;
 import striped.object;
 
 struct StripeCharge
@@ -9,6 +10,8 @@ struct StripeCharge
     mixin field!(int, "amount");
     mixin field!(int, "amountCaptured", "amount_captured");
     mixin field!(int, "amountRefunded", "amount_refunded");
+
+    mixin expandable!(StripeCustomer, "customer");
 }
 
 version (unittest)
@@ -26,25 +29,6 @@ unittest
     assert(charge.id == null);
     assert(charge.isPersisted == false);
     assert(charge.amount.isNull);
-}
-
-unittest
-{
-    const client = StripeClient("sk_test_1");
-    
-    StripeCharge(client, parseJSON("[]")).assertThrown!(StripeJSONException);
-}
-
-
-unittest
-{
-    const client = StripeClient("sk_test_1");
-    
-    StripeCharge(client, parseJSON(`
-        {
-            "object": "refund"
-        }
-    `)).assertThrown!(StripeObjectTypeException);
 }
 
 unittest

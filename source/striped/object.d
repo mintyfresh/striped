@@ -75,6 +75,7 @@ mixin template StripeObject(string _stripeObjectType)
     import std.json : JSONValue, JSONType;
     import std.string : format;
     import std.typecons : Nullable;
+    import std.variant : Algebraic;
 
     import striped.client;
 
@@ -161,4 +162,143 @@ public:
             jsonAttributeName.stringof
         ));
     }
+
+    mixin template expandable(ObjectType, string propertyName, string jsonAttributeName = propertyName)
+    {
+        mixin(`
+            @property
+            Algebraic!(string, ObjectType, typeof(null)) %s() const
+            {
+                typeof(return) result;
+
+                if (auto ptr = %s in _object)
+                {
+                    if (ptr.type == JSONType.null_)
+                    {
+                        result = null;
+                    }
+                    else if (ptr.type == JSONType.string)
+                    {
+                        result = ptr.str;
+                    }
+                    else if (ptr.type == JSONType.object)
+                    {
+                        result = ObjectType(_client, *ptr);
+                    }
+                    else
+                    {
+                        assert(0); // TODO: Add helpful error message.
+                    }
+                }
+                else
+                {
+                    result = null;
+                }
+
+                return result;
+            }
+        `.format(
+            propertyName,
+            jsonAttributeName.stringof
+        ));
+    }
+}
+
+version (unittest)
+{
+    import std.exception;
+    import std.json;
+    import std.variant : visit;
+
+    import striped.client;
+
+    struct TestObject
+    {
+        mixin StripeObject!("test");
+
+        mixin expandable!(TestObject, "expandable");
+    }
+}
+
+unittest
+{
+    const client = StripeClient("sk_test_1");
+
+    TestObject(client, parseJSON("[]")).assertThrown!(StripeJSONException);
+}
+
+unittest
+{
+    const client = StripeClient("sk_test_1");
+
+    TestObject(client, parseJSON(`
+        {
+            "id": "to_12345",
+            "object": "charge"
+        }
+    `)).assertThrown!(StripeObjectTypeException);
+}
+
+unittest
+{
+    const client = StripeClient("sk_test_1");
+    const object = TestObject(client, parseJSON(`
+        {
+            "id": "to_12345",
+            "object": "test",
+            "expandable": "ex_12345"
+        }
+    `));
+
+    assert(object.expandable == "ex_12345");
+}
+
+unittest
+{
+    const client = StripeClient("sk_test_1");
+    const object = TestObject(client, parseJSON(`
+        {
+            "id": "to_12345",
+            "object": "test"
+        }
+    `));
+
+    assert(object.expandable == null);
+}
+
+unittest
+{
+    const client = StripeClient("sk_test_1");
+    const object = TestObject(client, parseJSON(`
+        {
+            "id": "to_12345",
+            "object": "test",
+            "expandable": null
+        }
+    `));
+
+    assert(object.expandable == null);
+}
+
+unittest
+{
+    const client = StripeClient("sk_test_1");
+    const object = TestObject(client, parseJSON(`
+        {
+            "id": "to_12345",
+            "object": "test",
+            "expandable": {
+                "id": "ex_12345",
+                "object": "test"
+            }
+        }
+    `));
+
+    object.expandable.visit!(
+        (string) { assert(0, "Incorrect expandable type."); },
+        (TestObject expandable) {
+            assert(expandable.id == "ex_12345");
+            assert(expandable.stripeObjectType == "test");
+        }
+    );
 }
