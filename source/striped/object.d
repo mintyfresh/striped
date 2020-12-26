@@ -23,8 +23,6 @@ private:
     JSONValue    _object;
 
 public:
-    @disable this();
-
     this(StripeClient client)
     {
         _client = client;
