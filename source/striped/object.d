@@ -3,7 +3,7 @@ module striped.object;
 import std.json;
 import std.string;
 
-mixin template StripeObject(string _stripeObjectType)
+mixin template StripeObject(string stripeObjectType = null)
 {
     import std.exception : enforce;
     import std.json : JSONValue, JSONType;
@@ -23,21 +23,31 @@ private:
     JSONValue    _object;
 
 public:
-    static immutable stripeObjectType = _stripeObjectType;
-
     @disable this();
 
     this(StripeClient client)
     {
         _client = client;
-        _object = JSONValue(["object": stripeObjectType]);
+        
+        static if (stripeObjectType)
+        {
+            _object = JSONValue(["object": stripeObjectType]);
+        }
+        else
+        {
+            _object = JSONValue((string[string]).init);
+        }
     }
 
     this(StripeClient client, JSONValue object)
     in
     {
         enforce(object.type == JSONType.object, new StripeJSONException(object, JSONType.object));
-        enforce(object["object"].str == stripeObjectType, new StripeObjectTypeException(object, stripeObjectType));
+
+        static if (stripeObjectType)
+        {
+            enforce(object["object"].str == stripeObjectType, new StripeObjectTypeException(object, stripeObjectType));
+        }
     }
     do
     {
@@ -119,7 +129,7 @@ version (unittest)
         mixin StripeObject!("test");
 
         mixin identifier;
-
+        mixin field!(string, "object");
         mixin expandable!(TestObject, "expandable");
     }
 }
@@ -202,7 +212,7 @@ unittest
         (string) { assert(0, "Incorrect expandable type."); },
         (TestObject expandable) {
             assert(expandable.id == "ex_12345");
-            assert(expandable.stripeObjectType == "test");
+            assert(expandable.object == "test");
         }
     );
 }
