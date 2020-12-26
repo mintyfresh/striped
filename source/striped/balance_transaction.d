@@ -6,6 +6,8 @@ struct StripeBalanceTransaction
 {
     mixin StripeObject!("balance_transaction");
 
+    mixin identifier;
+
     mixin field!(int, "amount");
     mixin field!(int, "availableOn", "available_on");
     mixin field!(int, "created");

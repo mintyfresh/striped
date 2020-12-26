@@ -7,6 +7,8 @@ struct StripeCard
 {
     mixin StripeObject!("card");
 
+    mixin identifier;
+
     mixin field!(string, "addressCity", "address_city");
     mixin field!(string, "addressCountry", "address_country");
     mixin field!(string, "addressLine1", "address_line1");

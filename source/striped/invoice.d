@@ -7,6 +7,8 @@ struct StripeInvoice
 {
     mixin StripeObject!("invoice");
 
+    mixin identifier;
+
     mixin field!(bool, "autoAdvance", "auto_advance");
     mixin field!(string, "collectionMethod", "collection_method");
     mixin field!(string, "currency");

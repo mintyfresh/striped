@@ -10,6 +10,8 @@ struct StripeCharge
 {
     mixin StripeObject!("charge");
 
+    mixin identifier;
+
     mixin field!(int, "amount");
     mixin field!(int, "amountCaptured", "amount_captured");
     mixin field!(int, "amountRefunded", "amount_refunded");

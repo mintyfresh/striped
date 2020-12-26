@@ -20,7 +20,6 @@ mixin template StripeObject(string _stripeObjectType)
 
 private:
     StripeClient _client;
-    string       _id;
     JSONValue    _object;
 
 public:
@@ -43,20 +42,24 @@ public:
     do
     {
         _client = client;
-        _id     = object["id"].str;
         _object = object;
     }
 
-    @property
-    string id() const
+    mixin template identifier()
     {
-        return _id;
-    }
+        @property
+        string id() const
+        {
+            auto ptr = "id" in _object;
 
-    @property
-    bool isPersisted() const
-    {
-        return _id !is null;
+            return ptr ? ptr.str : null;
+        }
+
+        @property
+        bool isPersisted() const
+        {
+            return id !is null;
+        }
     }
 
     mixin template expandable(ObjectType, string propertyName, string jsonAttributeName = propertyName)
@@ -114,6 +117,8 @@ version (unittest)
     struct TestObject
     {
         mixin StripeObject!("test");
+
+        mixin identifier;
 
         mixin expandable!(TestObject, "expandable");
     }

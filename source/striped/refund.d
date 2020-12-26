@@ -8,6 +8,8 @@ struct StripeRefund
 {
     mixin StripeObject!("refund");
 
+    mixin identifier;
+
     mixin field!(int, "amount");
     mixin field!(int, "created");
     mixin field!(string, "currency");
