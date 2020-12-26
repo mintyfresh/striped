@@ -1,5 +1,6 @@
 module striped.charge;
 
+import striped.balance_transaction;
 import striped.billing_details;
 import striped.customer;
 import striped.invoice;
@@ -22,6 +23,7 @@ struct StripeCharge
     mixin field!(string, "statementDescriptorSuffix", "statement_descriptor_suffix");
     mixin field!(string, "status");
 
+    mixin expandable!(StripeBalanceTransaction, "balanceTransaction", "balance_transaction");
     mixin expandable!(StripeCustomer, "customer");
     mixin expandable!(StripeInvoice, "invoice");
 
