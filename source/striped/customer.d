@@ -2,6 +2,7 @@ module striped.customer;
 
 import striped.address;
 import striped.object;
+import striped.shipping;
 
 struct StripeCustomer
 {
@@ -23,4 +24,5 @@ struct StripeCustomer
     mixin field!(string, "taxExempt", "tax_exempt");
 
     mixin embeddable!(StripeAddress, "address");
+    mixin embeddable!(StripeShipping, "shipping");
 }
