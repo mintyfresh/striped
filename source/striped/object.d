@@ -3,7 +3,9 @@ module striped.object;
 import std.json;
 import std.string;
 
-mixin template StripeObject(string stripeObjectType = null)
+enum UNTYPED_OBJECT = null;
+
+mixin template StripeObject(string stripeObjectType)
 {
     import std.exception : enforce;
     import std.json : JSONValue, JSONType;

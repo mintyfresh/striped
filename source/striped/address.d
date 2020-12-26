@@ -1,10 +1,10 @@
 module striped.address;
 
-import striped.embeddable;
+import striped.object;
 
 struct StripeAddress
 {
-    mixin Embeddable;
+    mixin StripeObject!(UNTYPED_OBJECT);
 
     mixin field!(string, "city");
     mixin field!(string, "country");

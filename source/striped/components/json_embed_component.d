@@ -58,7 +58,7 @@ mixin template JSONEmbedComponent()
                 else
                 {
                     case JSONType.object:
-                        return EmbeddableType(ObjectType(value));
+                        return EmbeddableType(ObjectType(_client, value));
                 }
 
                 default:

@@ -1,11 +1,11 @@
 module striped.shipping;
 
 import striped.address;
-import striped.embeddable;
+import striped.object;
 
 struct StripeShipping
 {
-    mixin Embeddable;
+    mixin StripeObject!(UNTYPED_OBJECT);
 
     mixin field!(string, "name");
     mixin field!(string, "phone");
