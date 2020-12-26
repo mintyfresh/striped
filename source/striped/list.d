@@ -18,7 +18,6 @@ unittest
     import striped.client : StripeClient;
 
     import std.json : parseJSON;
-    import std.variant : visit;
 
     const client = StripeClient("sk_test_1");
     const list   = StripeList!(StripeCard)(client, parseJSON(`
@@ -34,13 +33,9 @@ unittest
         }
     `));
 
-    list.data.visit!(
-        (StripeCard[] cards) {
-            assert(cards.length == 1);
-            assert(cards[0].id == "card_1234");
-        },
-        (typeof(null)) {
-            assert(0, "Incorrect data type.");
-        }
-    );
+    assert(!list.data.isNull);
+
+    const cards = list.data.get;
+    assert(cards.length == 1);
+    assert(cards[0].id == "card_1234");
 }

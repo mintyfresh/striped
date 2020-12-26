@@ -4,25 +4,21 @@ mixin template JSONEmbedComponent()
 {
     import std.json : JSONType;
     import std.string : format;
-    import std.variant : Algebraic;
+    import std.typecons : Nullable;
 
     mixin template embeddable(ObjectType, string propertyName, string jsonAttributeName = propertyName)
     {
-        alias EmbeddableType = Algebraic!(ObjectType, typeof(null));
+        alias EmbeddableType = Nullable!(ObjectType);
 
         mixin(`
             @property
             EmbeddableType %s() const
             {
-                typeof(return) result = void;
+                typeof(return) result;
 
                 if (auto ptr = %s in _object)
                 {
                     result = buildEmbeddableObject(*ptr);
-                }
-                else
-                {
-                    result = null;
                 }
 
                 return result;
@@ -40,7 +36,7 @@ mixin template JSONEmbedComponent()
             switch (value.type)
             {
                 case JSONType.null_:
-                    return EmbeddableType(null);
+                    return EmbeddableType.init;
 
                 static if (isArray!(ObjectType) && !isSomeString!(ObjectType))
                 {
